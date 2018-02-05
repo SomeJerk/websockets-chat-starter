@@ -10,7 +10,55 @@
          online at your node.js address under /socket.io/socket.io.js 
          You can disable that on the server if desired
     -->
+    <script src="/socket.io/socket.io.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.34/browser.min.js"></script>
+    <script type="text/babel">
+        const connectSocket = (e) => {
+            const message = document.querySelector("#message");
+            const chat = document.querySelector("#chat");
+            const socket = io.connect();
+            
+            socket.on('connect', () => {
+                console.log('connecting');
+                
+                let user = document.querySelector("#username").value;
+                
+                if(!user) {
+                    user = 'unknown';
+                }
+                
+                socket.emit('join', { name: user });
+            });
+            
+            socket.on('msg', (data) => {
+                chat.value += `\n${data.name}: ${data.msg}`;
+                console.log(data);
+                document.querySelector("#send").onclick = function(){
+                    data.msg = message.value;
+                    socket.emit('msgToServer', data);
+                };
+            });
+        };
+
+        const messageSocket = (e) => {
+            const message = document.querySelector("#message");
+            const socket = io.connect();
+                        
+            socket.on('msg', (data) => {
+                data.msg = message.value;
+                socket.emit('msgToServer', data);
+            });
+        };
+
+        const init = () => {
+            const connect = document.querySelector("#connect");
+            const send = document.querySelector("#send");
+            connect.addEventListener('click', connectSocket);
+            //send.addEventListener('click', messageSocket);
+        };
+
+        window.onload = init;
+    </script>
 	<style>
 		textarea {
 			display: block;
